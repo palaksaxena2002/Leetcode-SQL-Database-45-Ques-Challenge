@@ -1,0 +1,25 @@
+-- MySQL
+
+
+SELECT U.name, 
+       COALESCE(SUM(R.distance), 0) AS travelled_distance
+FROM Users U
+LEFT JOIN Rides R
+ON U.id = R.user_id
+GROUP BY U.id, U.name
+ORDER BY travelled_distance DESC, U.name ASC;
+
+LEFT JOIN- ensures all users are included, even if they have no rides.
+COALESCE- handles users with no rides, replacing `NULL` with `0`.
+GROUP BY- is used to aggregate distances by each user.
+
+#EXPLANTION:
+1.	LEFT JOIN: It joins the Users table (U) with the Rides table (R) using a LEFT JOIN, which ensures that all users from the Users table are included, even if they have no corresponding rides in the Rides table.
+2.	SUM: For each user, it calculates the total distance traveled by summing up the distance values from the Rides table. If a user has no rides, SUM(R.distance) will return NULL.
+3.	COALESCE: The COALESCE function is used to handle cases where users have no rides (i.e., NULL values). It replaces NULL with 0, so that users with no rides are shown with a traveled distance of 0.
+4.	GROUP BY: The query groups the results by U.id and U.name, which ensures that we calculate the sum of distances for each user individually.
+5.	ORDER BY: The results are ordered:
+o	First, by travelled_distance in descending order so that users who have traveled the most distance appear at the top.
+o	Second, if two or more users have traveled the same distance, they are ordered by name in ascending order (alphabetically).
+
+
