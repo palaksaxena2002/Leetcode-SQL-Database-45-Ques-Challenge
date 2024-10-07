@@ -6,8 +6,8 @@ Problem :https://leetcode.com/problems/top-travellers/description/?envType=probl
 
 Challenge : https://leetcode.com/problem-list/e97a9e5m/
 
-Solutions :
-1.LEFT JOIN with GROUP BY
-2.SUBQUERY
-3.CTE (Common Table Expression)
-4.UNION ALL
+Solutions :<br>
+1.LEFT JOIN with GROUP BY<br>
+2.SUBQUERY <br>
+3.CTE (Common Table Expression)<br>
+4.UNION ALL <br>
