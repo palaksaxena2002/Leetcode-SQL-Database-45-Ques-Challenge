@@ -1,0 +1,53 @@
+PATIENTS WITH A CONDITION
+1527
+
+
+METHOD 1: LIKE OPERATOR
+
+SELECT *
+FROM Patients
+WHERE
+  conditions LIKE 'DIAB1%'
+  OR conditions LIKE '% DIAB1%';
+
+Explanation:
+•	This query checks whether the conditions column starts with the prefix "DIAB1" or if "DIAB1" appears anywhere in the conditions after a space. Here's a breakdown of the logic:
+
+•	LIKE 'DIAB1%':This condition checks if the conditions string starts with the prefix "DIAB1".The % symbol is a wildcard that matches any number of characters after "DIAB1".
+
+
+•	LIKE '% DIAB1%':This condition checks if " DIAB1" appears anywhere in the conditions string after a space.The % before " DIAB1" allows any characters before the " DIAB1", ensuring it matches only when "DIAB1" starts after a space.
+
+•	This query efficiently captures all cases where "DIAB1" appears at the beginning of the string or after a space, ensuring we find patients with the condition for Type I Diabetes as expected.
+
+METHOD 2: REGEXP FOR REGULAR EXPRESSION MATCHING
+
+SELECT patient_id, patient_name, conditions
+FROM Patients
+WHERE conditions REGEXP '(^| )DIAB1';
+
+Explanation:
+•	This query uses regular expression (REGEXP) to match patients who have the condition for Type I Diabetes, which starts with "DIAB1" either at the beginning of the conditions string or after a space.
+•	REGEXP '(^| )DIAB1':
+•	^: This matches the beginning of the string. So, "DIAB1" appearing as the first condition will be matched.
+•	|: This acts as an OR operator. It checks if "DIAB1" either starts at the beginning of the string or after a space.
+•	 A space, ensuring that "DIAB1" appears as a distinct word after a space in the string.
+•	"DIAB1": The exact prefix we're looking for in the conditions column.
+•	 (^| ) ensures that "DIAB1" is either the first condition or appears as a distinct word in the middle of the conditions string.
+•	REGEXP is more powerful and flexible than LIKE for pattern matching, allowing for more precise control over string searches.
+
+METHOD 3 : LOCATE()
+
+SELECT patient_id, patient_name, conditions
+FROM Patients
+WHERE LOCATE('DIAB1', conditions) > 0;
+
+Explanation:
+•	 This query uses the LOCATE() function to find patients who have a condition starting with the "DIAB1" prefix in their conditions column.
+
+•	LOCATE('DIAB1', conditions):The LOCATE() function returns the starting position of the substring "DIAB1" in the conditions column.
+•	If "DIAB1" is found, it will return a positive integer indicating the position where it starts.
+•	If "DIAB1" is not found, the function returns 0.
+•	LOCATE('DIAB1', conditions) > 0:This ensures that "DIAB1" exists somewhere in the conditions column.
+•	If the return value is greater than 0, it means "DIAB1" is present in the conditions for that patient.
+
