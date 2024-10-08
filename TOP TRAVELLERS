@@ -1,0 +1,87 @@
+Problem Link :https://leetcode.com/problems/patients-with-a-condition/?envType=problem-list-v2&envId=e97a9e5m
+
+Problem : TOP TRAVELLERS
+
+Solutions:
+
+METHOD 1: LEFT JOIN WITH GROUP BY 
+
+SELECT U.name, 
+       COALESCE(SUM(R.distance), 0) AS travelled_distance
+FROM Users U
+LEFT JOIN Rides R
+ON U.id = R.user_id
+GROUP BY U.id, U.name
+ORDER BY travelled_distance DESC, U.name ASC;
+ 
+Explanation:
+•	LEFT JOIN: It joins the Users table (U) with the Rides table (R) using a LEFT JOIN, which ensures that all users from the Users table are included, even if they have no corresponding rides in the Rides table.
+•	SUM: For each user, it calculates the total distance traveled by summing up the distance values from the Rides table. If a user has no rides, SUM(R.distance) will return NULL.
+•	COALESCE: The COALESCE function is used to handle cases where users have no rides (i.e., NULL values). It replaces NULL with 0, so that users with no rides are shown with a traveled distance of 0.
+•	GROUP BY: The query groups the results by U.id and U.name, which ensures that we calculate the sum of distances for each user individually.
+•	ORDER BY: The results are ordered:
+•	First, by travelled_distance in descending order so that users who have traveled the most distance appear at the top.
+•	Second, if two or more users have traveled the same distance, they are ordered by name in ascending order (alphabetically).
+
+METHOD 2: SUBQUERY
+
+SELECT U.name, 
+       COALESCE(R.total_distance, 0) AS travelled_distance
+FROM Users U
+LEFT JOIN (
+    SELECT user_id, SUM(distance) AS total_distance
+    FROM Rides
+    GROUP BY user_id
+) R
+ON U.id = R.user_id
+ORDER BY travelled_distance DESC, U.name ASC;
+
+Explanation:
+•	Subquery:Inside the LEFT JOIN, the subquery calculates the total traveled distance for each user (user_id) by summing the distance values in the Rides tableIt groups the rides by user_id and returns the result as total_distance for each user.
+•	LEFT JOIN:The LEFT JOIN ensures that all users from the Users table are included, even if they do not have any corresponding entries in the Rides table.The join is performed between the Users table (U.id) and the result of the subquery (R.user_id).
+•	COALESCE:COALESCE(R.total_distance, 0) is used to handle cases where a user has no rides (i.e., R.total_distance is NULL), ensuring that users with no rides are assigned a distance of 0.
+•	ORDER BY:The query orders the result first by travelled_distance in descending order, so users who have traveled the most appear at the top.If two or more users have traveled the same distance, the query orders them by U.name in ascending order (alphabetically).
+
+METHOD 3 : CTE
+
+WITH TotalDistance AS (
+    SELECT user_id, SUM(distance) AS travelled_distance
+    FROM Rides
+    GROUP BY user_id
+)
+SELECT U.name, 
+       COALESCE(TD.travelled_distance, 0) AS travelled_distance
+FROM Users U
+LEFT JOIN TotalDistance TD
+ON U.id = TD.user_id
+ORDER BY travelled_distance DESC, U.name ASC;
+
+Explanation:
+•	 CTE (WITH Clause):The CTE TotalDistance computes the total distance traveled by each user (user_id) by summing the distance values from the Rides table.It groups the rides by user_id, returning a result set with two columns: user_id and travelled_distance.
+
+•	 Main Query:The main query selects name from the Users table (U) and joins it with the CTE TotalDistance (TD) on user_id to retrieve the corresponding travelled_distance.The LEFT JOIN ensures that all users are included in the result, even if they haven't taken any rides.
+
+
+•	COALESCE:The COALESCE(TD.travelled_distance, 0) ensures that if a user has no rides (i.e., TD.travelled_distance is NULL), it will display 0 as their traveled distance.
+
+•	 ORDER BY:The result is ordered by travelled_distance in descending order so that users who traveled the most are displayed first.If two or more users have traveled the same distance, they are sorted by their name in ascending order (alphabetically).
+ 
+METHOD 4 : UNION ALL
+
+SELECT U.name, SUM(R.distance) AS travelled_distance
+FROM Users U
+JOIN Rides R
+ON U.id = R.user_id
+GROUP BY U.name
+UNION ALL
+SELECT U.name, 0 AS travelled_distance
+FROM Users U
+WHERE NOT EXISTS (
+    SELECT 1 FROM Rides R WHERE R.user_id = U.id
+)
+ORDER BY travelled_distance DESC, name ASC;
+Explanation:
+•	First Part (Users with Rides):The query starts by selecting the users who have taken rides and calculating the total distance they have traveled.It performs an INNER JOIN between the Users (U) and Rides (R) tables, matching users to their respective rides by user_id.The query groups by the name column from Users and sums the distance from Rides.
+•	Second Part (Users without Rides):The UNION ALL adds users who have not taken any rides.For these users, the query uses WHERE NOT EXISTS to select users from the Users table who do not have any corresponding rows in the Rides table.For these users, the traveled distance is set to 0.
+•	UNION ALL:The UNION ALL ensures that both sets of results (users with rides and users without rides) are combined into a single result set.Unlike UNION, UNION ALL does not remove duplicates, but in this case, duplicates are not a concern since the two subqueries are selecting distinct users.
+•	The final result is ordered by travelled_distance in descending order, so the users who traveled the most are listed first. If two or more users have the same traveled distance, they are sorted alphabetically by name.
