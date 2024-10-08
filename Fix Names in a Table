@@ -1,0 +1,88 @@
+ 
+Problem :Fix Names in a Table
+
+1667
+
+METHOD 1: CONCAT(), UPPER(), AND LOWER()
+
+SELECT
+  user_id,
+  CONCAT(
+    UPPER(SUBSTRING(name, 1, 1)),
+    LOWER(SUBSTRING(name, 2))
+  ) AS name
+FROM Users
+ORDER BY 1;
+
+Explanation:
+•	SUBSTRING(name, 1, 1):This extracts the first character from the name field.
+•	UPPER(SUBSTRING(name, 1, 1)):Converts the extracted first character to uppercase.
+•	SUBSTRING(name, 2):This extracts the rest of the string starting from the second character
+•	LOWER(SUBSTRING(name, 2)):Converts the rest of the string to lowercase.
+•	CONCAT(UPPER(SUBSTRING(...)), LOWER(SUBSTRING(...))):Combines the uppercase first letter and the lowercase remainder of the name.
+•	ORDER BY 1:Orders the results by the first column, which is user_id.
+
+
+
+
+
+
+
+
+
+
+1667
+
+METHOD 2: LEFT() AND RIGHT()
+
+SELECT 
+    user_id, 
+    CONCAT(UPPER(LEFT(name, 1)), LOWER(RIGHT(name, LENGTH(name) - 1))) AS name
+FROM 
+    Users
+ORDER BY 
+    user_id;
+
+
+Explanation:
+•	This query is another solution to correct the capitalization of the names in the Users table, ensuring that only the first letter is uppercase and the rest are lowercase.
+•	LEFT(name, 1):Extracts the first character of the name.
+•	UPPER(LEFT(name, 1)):Converts the extracted first character to uppercase.
+•	LENGTH(name) - 1:Calculates the length of the name minus 1, which gives the number of characters after the first one.
+•	RIGHT(name, LENGTH(name) - 1):Extracts the rest of the string, i.e., all characters except the first one.
+•	LOWER(RIGHT(name, LENGTH(name) - 1)):Converts the remaining characters to lowercase.
+•	CONCAT(UPPER(LEFT(...)), LOWER(RIGHT(...))):Combines the uppercase first letter and the lowercase remainder of the name.
+•	ORDER BY user_id:Orders the result by user_id in ascending order.
+•	This query handles both short and long names and ensures that any capitalization inconsistencies are corrected efficiently.
+ 
+
+
+1667
+
+METHOD 3 : USING STORED PROCEDURE
+
+
+DELIMITER //
+CREATE PROCEDURE FixNames()
+BEGIN
+    UPDATE Users
+    SET name = CONCAT(UPPER(SUBSTRING(name, 1, 1)), LOWER(SUBSTRING(name, 2)));
+END //
+DELIMITER ;
+CALL FixNames();
+
+
+Explanation:
+•	This solution uses a stored procedure in MySQL to fix the capitalization of names in the Users table, ensuring that only the first letter is uppercase and the rest are lowercase.
+•	DELIMITER //:Changes the delimiter from the default semicolon (;) to // so that you can use semicolons inside the procedure without terminating it prematurely.
+•	CREATE PROCEDURE FixNames():Defines a stored procedure called FixNames().
+•	BEGIN ... END:Marks the beginning and end of the procedure body.
+•	UPDATE Users SET name = CONCAT(UPPER(SUBSTRING(name, 1, 1)), LOWER(SUBSTRING(name, 2)));:This SQL statement updates the name column in the Users table. It does the following:
+•	SUBSTRING(name, 1, 1): Extracts the first character of the name.
+•	UPPER(SUBSTRING(name, 1, 1)): Converts the first character to uppercase.
+•	SUBSTRING(name, 2): Extracts the rest of the string (from the second character onward).
+•	LOWER(SUBSTRING(name, 2)): Converts the rest of the string to lowercase.
+•	CONCAT(...): Combines the uppercase first letter with the lowercase remainder of the name.
+•	DELIMITER ;:Resets the delimiter back to semicolon (;).
+•	CALL FixNames();:Calls the stored procedure FixNames() to execute the UPDATE query and fix all the names in the Users table.
+•	Once the stored procedure is executed, all the names in the Users table will be updated so that only the first character is uppercase and the rest are lowercase.
