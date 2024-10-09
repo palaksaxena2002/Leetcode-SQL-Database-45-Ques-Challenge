@@ -1,0 +1,110 @@
+🌟𝗣𝗿𝗼𝗯𝗹𝗲𝗺 𝗦𝘁𝗮𝘁𝗲𝗺𝗲𝗻𝘁:
+Difficulty Level:EASY
+❓ Problem link : https://lnkd.in/eKf2Hvth
+ 
+🌟𝗧𝗵𝗲 𝗖𝗵𝗮𝗹𝗹𝗲𝗻𝗴𝗲:
+The main difficulty of the problem is to transform the Department table, which contains monthly revenue data for each department, into a format where each department has a single row with separate columns for each month's revenue. The challenge lies in correctly aggregating the revenues without losing information, especially when multiple records exist for the same department across different months.
+🌟𝗜𝗻𝗶𝘁𝗶𝗮𝗹 𝗧𝗵𝗼𝘂𝗴𝗵𝘁𝘀:
+When I first encountered this problem, my thought process focused on how to pivot the data effectively. I considered using 𝘀𝘂𝗯𝗾𝘂𝗲𝗿𝗶𝗲𝘀 to fetch revenue for each month based on the department ID. However, I realized that this method might not be the most efficient way to retrieve the data since it would involve multiple scans of the same table ,this leads to increased execution time. The second method that is 𝗦𝗨𝗠 𝗳𝘂𝗻𝗰𝘁𝗶𝗼𝗻 𝗮𝗻𝗱 𝘁𝗵𝗲 𝗜𝗙 𝗰𝗼𝗻𝗱𝗶𝘁𝗶𝗼𝗻 performs a single scan of the table but is less intuitive.
+🌟𝗢𝗽𝘁𝗶𝗺𝗶𝘇𝗮𝘁𝗶𝗼𝗻 𝗦𝘁𝗿𝗮𝘁𝗲𝗴𝘆:
+To optimize the solution, I decided to use conditional aggregation with the 𝗠𝗔𝗫 𝗳𝘂𝗻𝗰𝘁𝗶𝗼𝗻 𝗮𝗻𝗱 𝗖𝗔𝗦𝗘 𝘀𝘁𝗮𝘁𝗲𝗺𝗲𝗻𝘁𝘀. This approach allows us to aggregate data in a single pass through the Department table, reducing the overhead of multiple subqueries. By grouping the results by department ID, we can efficiently create a single row per department with columns for each month’s revenue.
+
+METHOD 1: CASE STATEMENTS AND GROUP BY
+
+SELECT
+    id,
+    MAX(CASE WHEN month = 'Jan' THEN revenue ELSE NULL END) AS Jan_Revenue,
+    MAX(CASE WHEN month = 'Feb' THEN revenue ELSE NULL END) AS Feb_Revenue,
+    MAX(CASE WHEN month = 'Mar' THEN revenue ELSE NULL END) AS Mar_Revenue,
+    MAX(CASE WHEN month = 'Apr' THEN revenue ELSE NULL END) AS Apr_Revenue,
+    MAX(CASE WHEN month = 'May' THEN revenue ELSE NULL END) AS May_Revenue,
+    MAX(CASE WHEN month = 'Jun' THEN revenue ELSE NULL END) AS Jun_Revenue,
+    MAX(CASE WHEN month = 'Jul' THEN revenue ELSE NULL END) AS Jul_Revenue,
+    MAX(CASE WHEN month = 'Aug' THEN revenue ELSE NULL END) AS Aug_Revenue,
+    MAX(CASE WHEN month = 'Sep' THEN revenue ELSE NULL END) AS Sep_Revenue,
+    MAX(CASE WHEN month = 'Oct' THEN revenue ELSE NULL END) AS Oct_Revenue,
+    MAX(CASE WHEN month = 'Nov' THEN revenue ELSE NULL END) AS Nov_Revenue,
+    MAX(CASE WHEN month = 'Dec' THEN revenue ELSE NULL END) AS Dec_Revenue
+FROM Department
+GROUP BY id
+ORDER BY id;
+
+
+
+Explanation:
+•	SELECT Clause:The query begins by selecting the id of each department.
+•	For each month (e.g., 'Jan', 'Feb', etc.), a conditional aggregation is used to create a separate column for that month’s revenue using the MAX(CASE WHEN ...) statement.
+•	MAX(CASE WHEN month = 'Jan' THEN revenue ELSE NULL END):
+•	CASE WHEN: The CASE statement checks whether the month is equal to a specific month (e.g., 'Jan', 'Feb', etc.).
+•	If the month matches the specified value, it returns the revenue for that month. If it doesn't match, it returns NULL.
+•	MAX(): The MAX() function is applied to ensure that only one value (the revenue) is returned per department for each month. Since the month is already checked in the CASE statement, it effectively works like selecting the revenue for that month.
+•	This is repeated for each month, creating columns like Jan_Revenue, Feb_Revenue, etc.
+•	FROM Department:This specifies the Department table as the source of the data, which contains id, revenue, and month.
+•	GROUP BY id:This groups the data by id (the department's unique identifier). Grouping ensures that the data is aggregated for each department, allowing the monthly revenues to be correctly pivoted into columns.
+•	ORDER BY id:This orders the final output by department id in ascending order, ensuring that the result is neatly organized by department.
+
+
+METHOD 2: SUM() AND IF CONDITION
+
+
+SELECT
+  id,
+  SUM(IF(month = 'Jan', revenue, NULL)) AS Jan_Revenue,
+  SUM(IF(month = 'Feb', revenue, NULL)) AS Feb_Revenue,
+  SUM(IF(month = 'Mar', revenue, NULL)) AS Mar_Revenue,
+  SUM(IF(month = 'Apr', revenue, NULL)) AS Apr_Revenue,
+  SUM(IF(month = 'May', revenue, NULL)) AS May_Revenue,
+  SUM(IF(month = 'Jun', revenue, NULL)) AS Jun_Revenue,
+  SUM(IF(month = 'Jul', revenue, NULL)) AS Jul_Revenue,
+  SUM(IF(month = 'Aug', revenue, NULL)) AS Aug_Revenue,
+  SUM(IF(month = 'Sep', revenue, NULL)) AS Sep_Revenue,
+  SUM(IF(month = 'Oct', revenue, NULL)) AS Oct_Revenue,
+  SUM(IF(month = 'Nov', revenue, NULL)) AS Nov_Revenue,
+  SUM(IF(month = 'Dec', revenue, NULL)) AS Dec_Revenue
+FROM Department
+GROUP BY 1;
+
+Explanation:
+•	SELECT Statement:The query selects the department id and uses conditional aggregation to sum the revenue for each month.
+•	SUM(IF(month = 'MonthName', revenue, NULL)):
+•	IF Condition: Inside the SUM() function, the IF condition checks whether the month is equal to a specific month (e.g., 'Jan', 'Feb', etc.).
+•	If the condition is true, it takes the corresponding revenue value.
+•	If the condition is false, it returns NULL. This means that only rows matching the given month are considered for the sum.
+•	This is repeated for each month, creating a column for each respective month’s revenue.
+•	AS Month_Revenue:The result of the SUM(IF()) for each month is given an alias corresponding to that month, like Jan_Revenue, Feb_Revenue, etc., to make the output more readable.
+•	FROM Department:The query operates on the Department table, which contains the columns id (department identifier), revenue (monthly revenue), and month (indicating the month name).
+•	GROUP BY 1:This groups the rows by the id column (the department ID). In GROUP BY 1, the 1 refers to the position of the id column in the SELECT list.
+•	Grouping by id ensures that the data for each department is aggregated correctly, with one row for each department.
+
+
+METHOD 3: SUBQUERIES
+
+SELECT  D.ID,
+ (SELECT REVENUE FROM DEPARTMENT WHERE ID = D.ID AND MONTH = 'JAN') AS JAN_REVENUE,
+    (SELECT REVENUE FROM DEPARTMENT WHERE ID = D.ID AND MONTH = 'FEB') AS FEB_REVENUE,
+    (SELECT REVENUE FROM DEPARTMENT WHERE ID = D.ID AND MONTH = 'MAR') AS MAR_REVENUE,
+    (SELECT REVENUE FROM DEPARTMENT WHERE ID = D.ID AND MONTH = 'APR') AS APR_REVENUE,
+    (SELECT REVENUE FROM DEPARTMENT WHERE ID = D.ID AND MONTH = 'MAY') AS MAY_REVENUE,
+    (SELECT REVENUE FROM DEPARTMENT WHERE ID = D.ID AND MONTH = 'JUN') AS JUN_REVENUE,
+    (SELECT REVENUE FROM DEPARTMENT WHERE ID = D.ID AND MONTH = 'JUL') AS JUL_REVENUE
+    (SELECT REVENUE FROM DEPARTMENT WHERE ID = D.ID AND MONTH = 'AUG') AS AUG_REVENUE,
+    (SELECT REVENUE FROM DEPARTMENT WHERE ID = D.ID AND MONTH = 'SEP') AS SEP_REVENUE,
+    (SELECT REVENUE FROM DEPARTMENT WHERE ID = D.ID AND MONTH = 'OCT') AS OCT_REVENUE,
+    (SELECT REVENUE FROM DEPARTMENT WHERE ID = D.ID AND MONTH = 'NOV') AS NOV_REVENUE,
+    (SELECT REVENUE FROM DEPARTMENT WHERE ID = D.ID AND MONTH = 'DEC') AS DEC_REVENUE
+FROM DEPARTMENT D
+GROUP BY D.ID
+ORDER BY D.ID;
+
+
+
+Explanation:
+•	SELECT Clause:The query selects the id of each department from the Department table.
+•	For each month from January to December, it retrieves the corresponding revenue for that department using subqueries.
+•	Subqueries:Each month’s revenue is fetched using a correlated subquery:
+•	d.id references the current row’s department ID from the outer query. The subquery retrieves the revenue for that specific month for the department being processed in the outer query.
+•	FROM Department d:This specifies the Department table as the data source. An alias d is given to this table for easier reference in the subqueries.
+•	GROUP BY d.id:The query groups the results by department ID to ensure that there’s one row per department. However, in this particular case, grouping does not aggregate any values since all columns (including the subqueries) depend on the ID.
+•	ORDER BY d.id:This orders the final output by department ID in ascending order.
+
+
