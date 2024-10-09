@@ -1,4 +1,31 @@
- 
+🎯𝙇𝙀𝙀𝙏𝘾𝙊𝘿𝙀 𝙎𝙌𝙇 𝘿𝘼𝙏𝘼𝘽𝘼𝙎𝙀 45 𝙌𝙐𝙀𝙎𝙏𝙄𝙊𝙉𝙎 𝘾𝙃𝘼𝙇𝙇𝙀𝙉𝙂𝙀 
+
+Problem of the Day: 🚀FIX NAMES IN A TABLE
+I tackled an interesting problem on LeetCode: Fix Names in a Table.
+Here's a brief overview of how I approached solving it.
+
+🌟𝗣𝗿𝗼𝗯𝗹𝗲𝗺 𝗦𝘁𝗮𝘁𝗲𝗺𝗲𝗻𝘁:
+
+Difficulty Level:Easy
+❓ Problem link : https://leetcode.com/problems/fix-names-in-a-table/description/?envType=problem-list-v2&envId=e97a9e5m
+
+🌟𝗧𝗵𝗲 𝗖𝗵𝗮𝗹𝗹𝗲𝗻𝗴𝗲:
+The main difficulty is correcting inconsistent capitalization in the name field of the Users table. Names may be entered with arbitrary capitalization, so the task is to ensure that only the first letter of each name is uppercase while the remaining letters are lowercase.
+
+🌟𝗜𝗻𝗶𝘁𝗶𝗮𝗹 𝗧𝗵𝗼𝘂𝗴𝗵𝘁𝘀:
+When first approaching this problem, I recognized that string manipulation functions would be required. Specifically, it is necessary to separate the first letter from the rest of the name and apply different transformations to each part. My initial thought was to use SQL functions like UPPER() to capitalize the first character and LOWER() to convert the rest of the string to lowercase.
+
+🌟𝗢𝗽𝘁𝗶𝗺𝗶𝘇𝗮𝘁𝗶𝗼𝗻 𝗦𝘁𝗿𝗮𝘁𝗲𝗴𝘆:
+To make the solution efficient and readable, I focused on using SQL functions that target specific parts of the string:
+String manipulation: By using SUBSTRING(), LEFT(), and RIGHT(), I can easily separate the first character from the rest of the string.
+Capitalization: The first letter is converted to uppercase using UPPER(), and the rest of the name is converted to lowercase with LOWER().
+Concatenation: The CONCAT() function is used to join the uppercase first letter with the rest of the lowercase string.
+
+Looking forward to sharing more soon!💛
+👉 Feel free to explore my Leetcode here:https://lnkd.in/e4JAGU97
+📌 Leetcode SQL Database 45 ques challenge:https://lnkd.in/eBAN_Psk
+
+  
 Problem :Fix Names in a Table
 
 1667
