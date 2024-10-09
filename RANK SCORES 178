@@ -1,7 +1,15 @@
  
-RANK SCORES
+RANK SCORES 178
 
-178
+Solution Approach:
+Identify the Challenge:
+The main challenge in this problem is to rank the scores in descending order, while ensuring that tied scores receive the same rank. Additionally, the ranks must be consecutive without any gaps, meaning that after a tie, the next distinct score should receive the next rank in the sequence.
+
+Initial Thoughts:
+When I first encountered the problem, my initial thought was to use a self-join approach to compare each score with every other score. This would allow me to assign ranks based on the number of higher scores. However, this approach is computationally expensive, especially with large datasets, as it requires multiple comparisons and can become inefficient.
+
+Optimization Strategy:
+To optimize the solution, I decided to leverage the DENSE_RANK() window function. This built-in SQL function is designed specifically for ranking scenarios where ties occur. DENSE_RANK() handles ties by giving equal scores the same rank and then continuing with the next consecutive rank. The advantage of using this method is that it reduces the need for complex joins and improves performance, making the solution more scalable and efficient.
 
 METHOD 1: DENSE_RANK()
 
@@ -16,20 +24,8 @@ Explanation:
 •	OVER(ORDER BY score DESC):This specifies how the ranking is applied: the scores are ordered in descending order (ORDER BY score DESC), meaning the highest score gets rank 1, the second-highest gets rank 2, and so on.
 •	Tied scores will have the same rank, and the next distinct score will have the next consecutive rank.
 •	 Efficient: The use of the DENSE_RANK() function is more efficient compared to a LEFT JOIN or self-join approach, especially for large datasets, because it avoids the need to manually compare each score to others.
-
 •	Cleaner Syntax: This method has a simpler and cleaner syntax than alternative solutions that use JOIN operations or subqueries.
 
-
-
-
-
-
-
-
-
-
-
-178
 
 METHOD 2: SELF JOIN
 
