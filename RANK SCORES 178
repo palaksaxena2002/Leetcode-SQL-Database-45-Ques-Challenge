@@ -1,0 +1,53 @@
+ 
+RANK SCORES
+
+178
+
+METHOD 1: DENSE_RANK()
+
+SELECT
+  score,
+  DENSE_RANK() OVER(ORDER BY score DESC) AS `rank`
+FROM Scores;
+
+Explanation:
+•	DENSE_RANK():The DENSE_RANK() function assigns a rank to each row in the result set based on the ORDER BY clause.
+•	The key feature of DENSE_RANK() is that it does not skip ranks in case of ties. If two scores are the same, they will be assigned the same rank, and the next rank will continue sequentially.
+•	OVER(ORDER BY score DESC):This specifies how the ranking is applied: the scores are ordered in descending order (ORDER BY score DESC), meaning the highest score gets rank 1, the second-highest gets rank 2, and so on.
+•	Tied scores will have the same rank, and the next distinct score will have the next consecutive rank.
+•	 Efficient: The use of the DENSE_RANK() function is more efficient compared to a LEFT JOIN or self-join approach, especially for large datasets, because it avoids the need to manually compare each score to others.
+
+•	Cleaner Syntax: This method has a simpler and cleaner syntax than alternative solutions that use JOIN operations or subqueries.
+
+
+
+
+
+
+
+
+
+
+
+178
+
+METHOD 2: SELF JOIN
+
+
+SELECT 
+    S1.score, 
+    COUNT(DISTINCT S2.score) AS `rank`
+FROM Scores S1
+LEFT JOIN Scores S2
+ON S1.score <= S2.score
+GROUP BY S1.id, S1.score
+ORDER BY S1.score DESC;
+
+Explanation:
+•	Self-Join:The table Scores is joined with itself, denoted by the aliases S1 and S2.
+•	The condition S1.score <= S2.score compares the score from S1 to the score from S2. This allows us to find out how many scores in S2 are greater than or equal to the score in S1.
+•	COUNT(DISTINCT S2.score):This counts the number of distinct scores in S2 that are greater than or equal to the current score in S1.This count gives the rank of each score: the highest score will have rank 1, the second-highest will have rank 2, and so on.
+•	GROUP BY S1.id, S1.score:This groups the results by the unique id and score from S1, so each score is ranked independently.
+•	ORDER BY S1.score DESC:This orders the result by score in descending order, ensuring that the highest score appears first in the result set
+•	This query works well for cases where you need to rank scores with ties but may be less efficient for very large datasets due to the LEFT JOIN and COUNT(DISTINCT) operations, which can become costly in terms of performance.
+•	A workaround for MySQL versions that don't support window functions.
