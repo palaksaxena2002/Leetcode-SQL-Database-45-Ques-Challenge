@@ -1,0 +1,138 @@
+🌟𝗣𝗿𝗼𝗯𝗹𝗲𝗺 𝗦𝘁𝗮𝘁𝗲𝗺𝗲𝗻𝘁:
+
+Difficulty Level:Easy
+
+❓ Problem link : https://leetcode.com/problems/sales-analysis-iii/description/?envType=problem-list-v2&envId=e97a9e5m
+
+ 
+
+🌟𝗧𝗵𝗲 𝗖𝗵𝗮𝗹𝗹𝗲𝗻𝗴𝗲:
+
+The challenge is to report the products that were only sold in the first quarter of 2019. The key difficulty lies in ensuring that a product is not sold outside of this time period (before January 1, 2019, or after March 31, 2019) while including those that were sold exclusively within this time range.
+
+🌟𝗜𝗻𝗶𝘁𝗶𝗮𝗹 𝗧𝗵𝗼𝘂𝗴𝗵𝘁𝘀:
+
+When I first encountered the problem, my initial approach was to:
+
+Identify all sales that happened within the first quarter of 2019.
+
+Filter out the products that were sold outside of this range.
+
+A JOIN between the Product and Sales tables seemed natural to access product details and sales data together. From there, using date comparisons within the WHERE clause or filtering within the HAVING clause felt like the next logical step.
+
+ 🌟𝗢𝗽𝘁𝗶𝗺𝗶𝘇𝗮𝘁𝗶𝗼𝗻 𝗦𝘁𝗿𝗮𝘁𝗲𝗴𝘆:
+
+The most efficient solution is likely using 𝗡𝗢𝗧 𝗘𝗫𝗜𝗦𝗧𝗦, 𝗲𝘀𝗽𝗲𝗰𝗶𝗮𝗹𝗹𝘆 𝗳𝗼𝗿 𝗹𝗮𝗿𝗴𝗲 𝗱𝗮𝘁𝗮𝘀𝗲𝘁𝘀 𝘄𝗶𝘁𝗵 𝗮𝗽𝗽𝗿𝗼𝗽𝗿𝗶𝗮𝘁𝗲 𝗶𝗻𝗱𝗲𝘅𝗶𝗻𝗴.EXISTS and NOT EXISTS are optimized to stop scanning once a matching condition is found. This can be significantly faster than GROUP BY and aggregation, especially with large datasets.With proper indexing on product_id and sale_date, the database can quickly verify if sales exist both within and outside the target period, without needing to aggregate or sort records
+1084
+
+METHOD 1: GROUP BY AND HAVING WITH CONDITIONS
+
+SELECT p.product_id, p.product_name
+FROM Product p
+JOIN Sales s ON p.product_id = s.product_id
+GROUP BY p.product_id, p.product_name
+HAVING MIN(s.sale_date) >= '2019-01-01'
+   AND MAX(s.sale_date) <= '2019-03-31';
+
+
+Explanation:
+•	JOIN between Product and Sales is used to link the product details.
+•	GROUP BY groups the sales by product_id and product_name.
+•	HAVING ensures that the minimum and maximum sale dates for each product are within the first quarter of 2019 (2019-01-01 to 2019-03-31).
+•	This approach leverages GROUP BY to aggregate the sales by product, then checks the minimum and maximum sale dates.
+•	Efficient in terms of filtering directly with MIN and MAX, which can use indexes on sale_date.
+•	If the Sales table is large, it will still need to scan all records for each product to compute the MIN and MAX, which may be costly.
+
+
+
+
+
+
+
+
+
+
+1084
+
+METHOD 2: SUBQUERIES
+
+SELECT p.product_id, p.product_name
+FROM Product p
+WHERE p.product_id IN (
+    SELECT DISTINCT s.product_id
+    FROM Sales s
+    WHERE s.sale_date BETWEEN '2019-01-01' AND '2019-03-31'
+)
+AND p.product_id NOT IN (
+    SELECT DISTINCT s.product_id
+    FROM Sales s
+    WHERE s.sale_date < '2019-01-01' OR s.sale_date > '2019-03-31'
+)
+
+Explanation:
+•	The first subquery finds products sold in Q1 2019.
+•	The second subquery excludes any products that were sold outside of this period.
+•	The DISTINCT keyword ensures that we only consider unique product IDs.
+•	This solution uses subqueries to first find products sold in the first quarter of 2019, and then excludes those sold outside this time period.
+•	Separating the two conditions can make the logic clear and allows the database to optimize each subquery individually.
+•	Subqueries may lead to inefficiencies as each subquery could result in a full scan of the Sales table. This can be particularly slow if there are many rows, especially without proper indexing.
+ 
+
+
+1084
+
+METHOD 3: NOT EXISTS
+
+SELECT p.product_id, p.product_name
+FROM Product p
+WHERE EXISTS (
+    SELECT 1 
+    FROM Sales s 
+    WHERE s.product_id = p.product_id 
+    AND s.sale_date BETWEEN '2019-01-01' AND '2019-03-31'
+)
+AND NOT EXISTS (
+    SELECT 1 
+    FROM Sales s 
+    WHERE s.product_id = p.product_id 
+    AND (s.sale_date < '2019-01-01' OR s.sale_date > '2019-03-31')
+);
+
+Explanation:
+•	The first EXISTS checks if the product was sold in Q1 2019.
+•	The second NOT EXISTS ensures that the product was not sold outside of Q1 2019.
+•	EXISTS returns true if the subquery finds any matching rows, ensuring efficient checks.
+•	This approach uses EXISTS and NOT EXISTS to check the existence of sales in the first quarter and to ensure that there are no sales outside this period.
+•	This approach can be more efficient because it avoids grouping or aggregating large datasets. EXISTS works with indexed data and short-circuits once a matching record is found, potentially reducing the number of rows scanned.
+•	For smaller datasets, EXISTS might not be noticeably faster, but it scales well with larger data if proper indexes exist on product_id and sale_date.
+
+
+
+1084
+
+METHOD 4: HAVING SUM WITH CONDITIONS
+
+SELECT
+  Product.product_id,
+  Product.product_name
+FROM Product
+INNER JOIN Sales
+  USING (product_id)
+GROUP BY 1, 2
+HAVING SUM(
+    Sales.sale_date < '2019-01-01'
+    OR Sales.sale_date > '2019-03-31'
+  ) = 0;
+Explanation:
+•	INNER JOIN USING (product_id): This joins the Product and Sales tables using the product_id, ensuring that the sales data is combined with the corresponding product details.
+•	GROUP BY 1, 2: This groups the results by the first and second columns in the SELECT clause, which are Product.product_id and Product.product_name. Grouping is necessary to perform the aggregation and filtering for each product.
+•	The HAVING clause is used to filter out products based on the aggregated conditions.
+•	SUM(Sales.sale_date < '2019-01-01' OR Sales.sale_date > '2019-03-31'): This condition checks if any sale for the product occurred outside the first quarter of 2019.
+•	The SUM function adds up these TRUE values across all rows for a product.
+•	If a sale date is either before 2019-01-01 or after 2019-03-31, the expression evaluates to TRUE (which is treated as 1).
+•	HAVING ... = 0: This ensures that there were no sales for the product outside of the first quarter of 2019. If the sum is 0, it means that all sales for that product occurred between 2019-01-01 and 2019-03-31.
+•	This approach checks for sales outside of the first quarter using HAVING SUM, which counts any sales that occurred before or after the first quarter.
+•	The conditional SUM() effectively filters products and avoids additional subqueries or multiple checks. It's efficient when product_id and sale_date are indexed.
+
+
+
