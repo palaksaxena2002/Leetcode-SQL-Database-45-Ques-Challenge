@@ -1,0 +1,74 @@
+
+
+
+METHOD 1: COUNT(DISTINCT) WITH GROUP BY
+
+SELECT 
+    date_id, 
+    make_name, 
+    COUNT(DISTINCT lead_id) AS unique_leads, 
+    COUNT(DISTINCT partner_id) AS unique_partners
+FROM DailySales
+GROUP BY date_id, make_name;
+
+
+Explanation:
+•	GROUP BY date_id, make_name groups the data by the date_id and make_name combination.
+•	COUNT(DISTINCT lead_id) counts the number of unique lead_id for each group.
+•	COUNT(DISTINCT partner_id) counts the number of unique partner_id for each group.
+•	This approach efficiently handles the problem using MySQL’s built-in functionality for distinct counting.
+
+
+
+METHOD 2: SUBQUERIES WITH GROUP BY
+
+SELECT 
+    ds1.date_id, 
+    ds1.make_name, 
+    ds1.unique_leads, 
+    ds2.unique_partners
+FROM 
+    (SELECT date_id, make_name, COUNT(DISTINCT lead_id) AS unique_leads
+     FROM DailySales
+     GROUP BY date_id, make_name) AS ds1
+JOIN 
+    (SELECT date_id, make_name, COUNT(DISTINCT partner_id) AS unique_partners
+     FROM DailySales
+     GROUP BY date_id, make_name) AS ds2
+ON ds1.date_id = ds2.date_id 
+AND ds1.make_name = ds2.make_name;
+
+Explanation:
+•	The first subquery computes the count of distinct lead_id for each combination of date_id and make_name.
+•	The second subquery computes the count of distinct partner_id for each combination.
+•	We then join the two results on date_id and make_name to get the final output.
+•	This approach is more modular but might be less efficient compared to the single query approach.
+ 
+
+
+METHOD 3: DISTINCT IN COMBINATION WITH WINDOW FUNCTIONS
+
+WITH CTE_Leads AS (
+    SELECT date_id, make_name, COUNT(DISTINCT lead_id) AS unique_leads
+    FROM DailySales
+    GROUP BY date_id, make_name
+),
+CTE_Partners AS (
+    SELECT date_id, make_name, COUNT(DISTINCT partner_id) AS unique_partners
+    FROM DailySales
+    GROUP BY date_id, make_name
+)
+SELECT 
+    CTE_Leads.date_id, 
+    CTE_Leads.make_name, 
+    CTE_Leads.unique_leads, 
+    CTE_Partners.unique_partners
+FROM CTE_Leads
+JOIN CTE_Partners 
+ON CTE_Leads.date_id = CTE_Partners.date_id 
+AND CTE_Leads.make_name = CTE_Partners.make_name;
+Explanation:
+•	First create common table expressions (CTEs) to compute the distinct counts for lead_id and partner_id.
+•	These results are then joined to get the final output.
+•	This approach can be beneficial when working with complex data transformations but may be overkill for simple distinct counting.
+
