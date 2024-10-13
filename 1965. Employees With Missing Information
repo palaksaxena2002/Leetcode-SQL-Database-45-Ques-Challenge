@@ -1,0 +1,223 @@
+
+# Write your MySQL query statement below
+SELECT Employees.employee_id
+FROM Employees
+LEFT JOIN Salaries
+  USING (employee_id)
+WHERE Salaries.salary IS NULL
+UNION ALL
+SELECT Salaries.employee_id
+FROM Salaries
+LEFT JOIN Employees
+  USING (employee_id)
+WHERE Employees.name IS NULL
+ORDER BY 1;
+
+### Solution Approach: Employees With Missing Information
+
+#### **Identify the Challenge:**
+
+The main challenge is to identify employees whose information is incomplete, either due to missing name data in the `Employees` table or missing salary data in the `Salaries` table. We need to return the `employee_id` of all such employees in ascending order.
+
+#### **Initial Thoughts:**
+
+Initially, my thought process was that we need to find the mismatches between two tables: `Employees` and `Salaries`. A simple `JOIN` might work, but we need to ensure that employees who exist in one table but not the other are also captured. My first approach was to look for `NULL` values in one table when joined with the other.
+
+#### **Optimization Strategy:**
+
+To optimize, I considered a few strategies:
+1. **Use `LEFT JOIN` and `RIGHT JOIN`**: By performing joins between both tables, we can detect missing entries.
+2. **Use `NOT EXISTS`**: This helps in identifying employees whose information is missing from either table. It avoids unnecessary joins and can be more efficient when working with larger datasets.
+3. **Simulate `FULL OUTER JOIN`**: Since MySQL does not support `FULL OUTER JOIN`, a combination of `LEFT JOIN` and `RIGHT JOIN` or `UNION` can be used to simulate this.
+
+#### **Final Solution:**
+
+The final solution uses `LEFT JOIN` on both tables and checks for missing values in either table. I applied the `UNION` operator to combine results where either the name or salary is missing, ensuring duplicates are avoided.
+
+```sql
+SELECT e.employee_id
+FROM Employees e
+LEFT JOIN Salaries s ON e.employee_id = s.employee_id
+WHERE s.salary IS NULL
+
+UNION
+
+SELECT s.employee_id
+FROM Salaries s
+LEFT JOIN Employees e ON e.employee_id = s.employee_id
+WHERE e.name IS NULL
+
+ORDER BY employee_id;
+```
+
+- **Why this works efficiently**:
+  - This query is optimized by combining results using `UNION`, which eliminates duplicates automatically.
+  - It efficiently handles both missing names and salaries by using `LEFT JOIN` to capture missing rows from either side.
+  - Sorting by `employee_id` ensures the results are in the required format.
+
+This solution provides a simple yet effective approach to solving the problem while ensuring clarity and efficiency.
+### **Solution Approach:**
+
+- **Identify the Challenge:** The main challenge is to find employees whose data is incomplete, either missing in the `Employees` table or in the `Salaries` table. We need to find such employees and return their IDs in ascending order.
+
+### **Initial Thoughts:**
+- To solve this problem, we can use **FULL OUTER JOIN** to combine both tables on `employee_id`. This allows us to check for rows where either the `name` or `salary` is NULL.
+- Since **FULL OUTER JOIN** is not directly supported in MySQL, we can emulate this behavior by combining results from **LEFT JOIN** and **RIGHT JOIN**.
+
+### **Optimization Strategy:**
+- Use **UNION** to combine the results of a **LEFT JOIN** and a **RIGHT JOIN**. The **LEFT JOIN** will catch employees who have names but are missing salaries, and the **RIGHT JOIN** will catch employees who have salaries but are missing names.
+- After combining, ensure no duplicates using **DISTINCT** and order the result by `employee_id`.
+
+### **Final Solution:**
+
+```sql
+SELECT employee_id
+FROM Employees e
+LEFT JOIN Salaries s ON e.employee_id = s.employee_id
+WHERE s.salary IS NULL
+
+UNION
+
+SELECT employee_id
+FROM Salaries s
+LEFT JOIN Employees e ON e.employee_id = s.employee_id
+WHERE e.name IS NULL
+
+ORDER BY employee_id;
+```
+
+### **Explanation:**
+- **LEFT JOIN (Employees LEFT JOIN Salaries)**: This part of the query finds all employees who are in the `Employees` table but do not have a corresponding row in the `Salaries` table (i.e., salary is missing).
+- **LEFT JOIN (Salaries LEFT JOIN Employees)**: This part of the query finds all employees who are in the `Salaries` table but do not have a corresponding row in the `Employees` table (i.e., name is missing).
+- **UNION**: Combines the two sets of results, ensuring that all employees with missing information are captured.
+- **ORDER BY**: The result is ordered by `employee_id` in ascending order, as required.
+
+### **Why it works efficiently:**
+- The solution captures all cases of missing data (either name or salary) using two simple joins, combined with a **UNION** to eliminate duplicates.
+- The query is also efficient as it processes each join separately, then merges the results, ensuring all missing information is captured in a streamlined way.
+
+#### **Approach 1: Using `LEFT JOIN` and `RIGHT JOIN` with `UNION`**
+
+This approach combines two `LEFT JOIN` queries to capture employees with missing information either in the `Employees` or `Salaries` table. We use `UNION` to merge both result sets and eliminate duplicates.
+
+```sql
+SELECT e.employee_id
+FROM Employees e
+LEFT JOIN Salaries s ON e.employee_id = s.employee_id
+WHERE s.salary IS NULL
+
+UNION
+
+SELECT s.employee_id
+FROM Salaries s
+LEFT JOIN Employees e ON e.employee_id = s.employee_id
+WHERE e.name IS NULL
+
+ORDER BY employee_id;
+```
+
+- **Explanation:**
+  - **LEFT JOIN Employees with Salaries**: Finds employees whose salaries are missing.
+  - **LEFT JOIN Salaries with Employees**: Finds employees whose names are missing.
+  - **UNION**: Combines both results, ensuring no duplicates.
+  - **ORDER BY**: Sorts the results by `employee_id` in ascending order.
+
+---
+
+#### **Approach 2: Using `FULL OUTER JOIN` Simulation (with `LEFT JOIN` and `RIGHT JOIN`)**
+
+Since MySQL doesn't support `FULL OUTER JOIN`, we can simulate it by combining both `LEFT JOIN` and `RIGHT JOIN`. This query captures missing information from either table.
+
+```sql
+SELECT employee_id
+FROM Employees e
+LEFT JOIN Salaries s ON e.employee_id = s.employee_id
+WHERE s.employee_id IS NULL
+
+UNION
+
+SELECT employee_id
+FROM Salaries s
+LEFT JOIN Employees e ON e.employee_id = s.employee_id
+WHERE e.employee_id IS NULL
+
+ORDER BY employee_id;
+```
+
+- **Explanation:**
+  - This approach is similar to the first one but checks for missing `employee_id` instead of missing `name` or `salary`. It produces the same result as the first query but in a slightly different manner.
+
+---
+
+#### **Approach 3: Using `NOT EXISTS` Subquery**
+
+This solution uses two subqueries with `NOT EXISTS` to identify employees either missing from the `Salaries` or `Employees` table.
+
+```sql
+SELECT employee_id
+FROM Employees e
+WHERE NOT EXISTS (
+    SELECT 1 FROM Salaries s WHERE e.employee_id = s.employee_id
+)
+UNION
+SELECT employee_id
+FROM Salaries s
+WHERE NOT EXISTS (
+    SELECT 1 FROM Employees e WHERE s.employee_id = e.employee_id
+)
+ORDER BY employee_id;
+```
+
+- **Explanation:**
+  - **NOT EXISTS**: Checks if there is no matching row in the other table.
+  - This approach uses subqueries to filter out employees with missing data and then combines the results using `UNION`.
+
+---
+
+#### **Approach 4: Using `LEFT JOIN` with `IS NULL` on Both Conditions**
+
+You can also use a single query with `LEFT JOIN` to capture employees who are missing either `name` or `salary`.
+
+```sql
+SELECT e.employee_id
+FROM Employees e
+LEFT JOIN Salaries s ON e.employee_id = s.employee_id
+WHERE s.salary IS NULL
+UNION
+SELECT s.employee_id
+FROM Salaries s
+LEFT JOIN Employees e ON s.employee_id = e.employee_id
+WHERE e.name IS NULL
+ORDER BY employee_id;
+```
+
+- **Explanation:**
+  - This approach still uses `LEFT JOIN` and `UNION`, but the logic focuses on checking the null values for missing data.
+
+---
+
+#### **Approach 5: Using `EXISTS` Instead of `NOT EXISTS`**
+
+Instead of using `NOT EXISTS`, you can reverse the logic by using `EXISTS` and a condition to exclude matches.
+
+```sql
+SELECT employee_id
+FROM Employees e
+WHERE NOT EXISTS (
+    SELECT 1 FROM Salaries s WHERE e.employee_id = s.employee_id
+)
+UNION
+SELECT employee_id
+FROM Salaries s
+WHERE NOT EXISTS (
+    SELECT 1 FROM Employees e WHERE s.employee_id = e.employee_id
+)
+ORDER BY employee_id;
+```
+
+- **Explanation:**
+  - Similar logic to Approach 3, but more focused on the opposite condition.
+
+---
+
+All these solutions are valid and efficient for finding employees with missing information, with slight differences in readability and performance depending on the size of the data.
