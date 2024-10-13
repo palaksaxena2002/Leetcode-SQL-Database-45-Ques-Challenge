@@ -1,0 +1,152 @@
+🎯𝙇𝙀𝙀𝙏𝘾𝙊𝘿𝙀 𝙎𝙌𝙇 𝘿𝘼𝙏𝘼𝘽𝘼𝙎𝙀 45 𝙌𝙐𝙀𝙎𝙏𝙄𝙊𝙉𝙎 𝘾𝙃𝘼𝙇𝙇𝙀𝙉𝙂𝙀 
+
+Problem of the Day: 🚀 𝗖𝘂𝘀𝘁𝗼𝗺𝗲𝗿 𝗪𝗵𝗼 𝗩𝗶𝘀𝗶𝘁𝗲𝗱 𝗯𝘂𝘁 𝗗𝗶𝗱 𝗡𝗼𝘁 𝗠𝗮𝗸𝗲 𝗔𝗻𝘆 𝗧𝗿𝗮𝗻𝘀𝗮𝗰𝘁𝗶𝗼𝗻𝘀
+
+Today, I tackled an interesting problem on LeetCode: Customer Who Visited but Did Not Make Any Transactions.
+
+Here's a brief overview of how I approached solving it.
+
+ 
+
+🌟𝗣𝗿𝗼𝗯𝗹𝗲𝗺 𝗦𝘁𝗮𝘁𝗲𝗺𝗲𝗻𝘁:
+
+Difficulty Level:Easy
+
+❓ Problem link : https://leetcode.com/problems/customer-who-visited-but-did-not-make-any-transactions/description/?envType=problem-list-v2&envId=e97a9e5m
+
+ 
+
+🌟𝗧𝗵𝗲 𝗖𝗵𝗮𝗹𝗹𝗲𝗻𝗴𝗲:
+
+The challenge here is to identify customers who visited the mall but did not make any transactions during those visits. The problem requires counting the number of such non-transactional visits for each customer. The key difficulty is efficiently excluding visits that resulted in transactions, while aggregating visits that didn't.
+
+🌟𝗜𝗻𝗶𝘁𝗶𝗮𝗹 𝗧𝗵𝗼𝘂𝗴𝗵𝘁𝘀:
+
+When encountering the problem, the first thought is to join the Visits and Transactions tables using the visit_id column and identify which visits did not have any matching transaction records. A 𝗟𝗘𝗙𝗧 𝗝𝗢𝗜𝗡 comes to mind immediately, as it allows us to keep all visits, including those without matching transactions. 𝗦𝘂𝗯𝗾𝘂𝗲𝗿𝘆 𝘄𝗶𝘁𝗵 𝗡𝗢𝗧 𝗜𝗡: This can be less efficient with large datasets due to the NOT IN clause, which requires evaluating the entire subquery.𝗡𝗢𝗧 𝗘𝗫𝗜𝗦𝗧𝗦: Similar in efficiency to LEFT JOIN, but in some cases, EXISTS can be optimized better for larger datasets by stopping the search once a match is found. 𝗖𝗧𝗘: The CTE finds all visits where no transactions were made by doing a LEFT JOIN and filtering for NULL transactions.
+
+ 🌟𝗢𝗽𝘁𝗶𝗺𝗶𝘇𝗮𝘁𝗶𝗼𝗻 𝗦𝘁𝗿𝗮𝘁𝗲𝗴𝘆:
+
+To optimize the solution, the use of a 𝗟𝗘𝗙𝗧 𝗝𝗢𝗜𝗡 can minimize the rows that need to be scanned.By filtering with NULL values directly in the LEFT JOIN result, we avoid costly subqueries and make use of indexed columns like visit_id.This 𝗮𝗽𝗽𝗿𝗼𝗮𝗰𝗵 𝗶𝘀 𝗲𝗳𝗳𝗶𝗰𝗶𝗲𝗻𝘁 𝗯𝗲𝗰𝗮𝘂𝘀𝗲 𝗶𝘁 𝗹𝗲𝘃𝗲𝗿𝗮𝗴𝗲𝘀 𝘁𝗵𝗲 𝘀𝘁𝗿𝘂𝗰𝘁𝘂𝗿𝗲 𝗼𝗳 𝘁𝗵𝗲 𝗱𝗮𝘁𝗮 𝘄𝗶𝘁𝗵 𝗺𝗶𝗻𝗶𝗺𝗮𝗹 𝗿𝗲𝗱𝘂𝗻𝗱𝗮𝗻𝗰𝘆 𝗮𝗻𝗱 𝘄𝗼𝗿𝗸𝘀 𝘄𝗲𝗹𝗹 𝗼𝗻 𝗹𝗮𝗿𝗴𝗲 𝗱𝗮𝘁𝗮𝘀𝗲𝘁𝘀 𝘄𝗶𝘁𝗵 𝗮𝗽𝗽𝗿𝗼𝗽𝗿𝗶𝗮𝘁𝗲 𝗶𝗻𝗱𝗲𝘅𝗶𝗻𝗴.
+
+Alternatively, NOT EXISTS can be used if we want to avoid bringing in unnecessary columns from the Transactions table, which can improve performance for large datasets.Ensure that visit_id is indexed in both Visits and Transactions tables for faster lookup and join operations.
+
+
+
+Looking forward to sharing more soon!💛
+
+👉 Feel free to explore my Leetcode here:https://lnkd.in/e4JAGU97
+
+ 📌 Leetcode SQL Database 45 ques challenge:https://lnkd.in/eBAN_Psk
+
+
+ 
+
+
+1581
+
+METHOD 1: LEFT JOIN AND GROUP BY
+
+SELECT
+  Visits.customer_id,
+  COUNT(Visits.visit_id) AS count_no_trans
+FROM Visits
+LEFT JOIN Transactions
+  USING (visit_id)
+WHERE Transactions.transaction_id IS NULL
+GROUP BY 1;
+
+
+Explanation:
+•	LEFT JOIN: We join the Visits table with the Transactions table on visit_id, and since it's a LEFT JOIN, all records from Visits will be kept, even if there is no matching record in Transactions.
+•	WHERE t.transaction_id IS NULL: This condition ensures that only visits without transactions are counted.
+•	COUNT(v.visit_id): We count how many visits without transactions each customer made.
+•	GROUP BY v.customer_id: Groups the results by the customer_id to get the total count of non-transaction visits per customer.
+•	Ensures we keep all visits from the Visits table and only bring in matching rows from Transactions. Any visit without a transaction will have a NULL in the transaction_id field.
+•	This approach is efficient because it leverages the structure of the data with minimal redundancy and works well on large datasets with appropriate indexing.
+
+
+
+
+
+
+
+
+1581
+
+METHOD 2: SUBQUERY WITH NOT IN
+
+
+SELECT 
+    v.customer_id, 
+    COUNT(v.visit_id) AS count_no_trans
+FROM Visits v
+WHERE v.visit_id NOT IN (
+    SELECT t.visit_id 
+    FROM Transactions t
+)
+GROUP BY v.customer_id;
+
+
+Explanation:
+•	NOT IN: This subquery retrieves all visit_ids from the Transactions table, and the main query returns only visits that are not present in that list (i.e., visits without transactions).
+•	COUNT(v.visit_id): Again, we count the number of visits without transactions.
+•	GROUP BY v.customer_id: Groups the results by customer_id to get the number of non-transaction visits for each customer. 
+
+
+1581
+
+METHOD 3: NOT EXISTS
+
+SELECT 
+    v.customer_id, 
+    COUNT(v.visit_id) AS count_no_trans
+FROM Visits v
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM Transactions t 
+    WHERE t.visit_id = v.visit_id
+)
+GROUP BY v.customer_id;
+
+
+Explanation:
+•	NOT EXISTS: For each visit_id in the Visits table, this checks if there is no corresponding entry in the Transactions table. If no matching entry exists, the visit is considered as having no transaction.
+•	COUNT(v.visit_id): Counts the visits with no transactions.
+•	GROUP BY v.customer_id: Groups the results by customer_id to calculate the total number of non-transaction visits per customer.
+
+
+
+
+
+
+
+
+
+
+
+1581
+
+METHOD 4: COMMON TABLE EXPRESSION (CTE)
+
+
+WITH NoTransactions AS (
+    SELECT v.visit_id, v.customer_id
+    FROM Visits v
+    LEFT JOIN Transactions t
+        ON v.visit_id = t.visit_id
+    WHERE t.transaction_id IS NULL
+)
+SELECT 
+    nt.customer_id, 
+    COUNT(nt.visit_id) AS count_no_trans
+FROM NoTransactions nt
+GROUP BY nt.customer_id;
+
+
+Explanation:
+•	CTE NoTransactions: The CTE finds all visits where no transactions were made by doing a LEFT JOIN and filtering for NULL transactions.
+•	Main Query: The main query simply counts the non-transaction visits from the CTE.
+•	COUNT(nt.visit_id): Counts the number of non-transaction visits for each customer.
+•	GROUP BY nt.customer_id: Groups the results by customer_id to aggregate the visits without transactions.
+
+
